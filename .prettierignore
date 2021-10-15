@@ -1,0 +1,8 @@
+.yarn/*
+.pnp.*
+CHANGELOG.md
+
+node_modules
+/build
+/.svelte-kit
+/package
