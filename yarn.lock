@@ -191,6 +191,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/big.js@npm:^6.1.2":
+  version: 6.1.2
+  resolution: "@types/big.js@npm:6.1.2"
+  checksum: fb0daa4b23e1cb9d0d1c847722ae3764978d0290875d91687c6ecc7566860129ce86b190b732294484077d45f9b82ef3e97784ee32c83aef05e8c8433c4fde6a
+  languageName: node
+  linkType: hard
+
 "@types/json-schema@npm:^7.0.7":
   version: 7.0.9
   resolution: "@types/json-schema@npm:7.0.9"
@@ -550,6 +557,13 @@ __metadata:
   version: 1.0.2
   resolution: "balanced-match@npm:1.0.2"
   checksum: 9706c088a283058a8a99e0bf91b0a2f75497f185980d9ffa8b304de1d9e58ebda7c72c07ebf01dadedaac5b2907b2c6f566f660d62bd336c3468e960403b9d65
+  languageName: node
+  linkType: hard
+
+"big.js@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "big.js@npm:6.1.1"
+  checksum: ba5db278e7d6700d7f92b7421e851bb65b6336d90b882869696c50574623c6be31f81500c3195fb1b391045163ffe62745e1c2bc30b35cb15e1b3e3ed135266b
   languageName: node
   linkType: hard
 
@@ -2634,9 +2648,11 @@ fsevents@~2.3.2:
   resolution: "papertrade@workspace:."
   dependencies:
     "@sveltejs/kit": next
+    "@types/big.js": ^6.1.2
     "@typescript-eslint/eslint-plugin": ^4.31.1
     "@typescript-eslint/parser": ^4.31.1
     autoprefixer: ^10.3.7
+    big.js: ^6.1.1
     cssnano: ^5.0.8
     eslint: ^7.32.0
     eslint-config-prettier: ^8.3.0
