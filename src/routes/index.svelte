@@ -7,7 +7,9 @@
   <p class="mb-10 text-n700">
     A simulated paper trading app using Binance live market data
   </p>
-  <a href="/trade" class="px-3 py-2 rounded-lg bg-b500 text-n0">Get started</a>
+  <a href="/app/trade" class="px-3 py-2 rounded-lg bg-b500 text-n0">
+    Get started
+  </a>
 </main>
 
 <style lang="postcss">

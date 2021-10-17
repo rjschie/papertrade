@@ -23,7 +23,7 @@
     }
 
     if (svg?.includes('class')) {
-      svg = svg.replace(/class=\"(.*?)\"/, `class="$1 ${newCls}"`);
+      svg = svg.replace(/class="(.*?)"/, `class="$1 ${newCls}"`);
     } else {
       svg = svg.replace('<svg', `<svg class="${newCls}"`);
     }

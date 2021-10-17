@@ -138,7 +138,10 @@
   }
 
   .btn:not(.active) {
-    @apply border-n300 hover:bg-n100;
+    @apply border-n300;
+  }
+  .btn:not(.active):hover {
+    @apply bg-n100;
   }
 
   .btn-buy.active {

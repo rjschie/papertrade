@@ -14,6 +14,7 @@ class Wallet {
 
   constructor() {
     if (dev && browser) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).Wallet = this;
     }
   }
