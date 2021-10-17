@@ -25,12 +25,12 @@
   }
 
   .btn-red {
-    @apply bg-r300;
-    @apply hover:bg-r500;
+    @apply bg-r500 bg-opacity-90;
+    @apply hover:bg-opacity-100 hover:bg-r500;
   }
   .btn-green {
-    @apply bg-g300;
-    @apply hover:bg-g500;
+    @apply bg-g500 bg-opacity-90;
+    @apply hover:bg-opacity-100 hover:bg-g500;
   }
 
   .btn-bordered {

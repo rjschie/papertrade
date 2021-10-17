@@ -12,6 +12,14 @@
 - [ ] Add transaction history (deposits & trades)
 - [ ] Add open orders
 - [ ] Reconcile on page load
-- [ ] Reconcile while page loaded
 - [ ] Trade more pairs
+- Misc. improvements
+  - [ ] Form validation
+    - [ ] order book
+    - [ ] wallet deposit / withdraw
+  - [ ] Modal tabbing
+    - use global "context" store
+  - [ ] table sorting
+  - [ ] "App feel"
 - [ ] KLines
+- [ ] Reconcile while page loaded

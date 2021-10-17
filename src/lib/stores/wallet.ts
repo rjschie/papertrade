@@ -4,7 +4,8 @@ import { writable } from 'svelte/store';
 import type { Subscriber, Readable } from 'svelte/store';
 
 export interface Asset {
-  type: 'currency' | 'coin';
+  symbol: string;
+  type: 'currency' | 'coin' | 'none';
   available: Big;
   balance: Big;
 }
@@ -51,8 +52,10 @@ class Wallet {
     });
   }
 
-  get(symbol: string): Asset | undefined {
-    return this.#wallet.get(symbol);
+  get(symbol: string): Asset {
+    return this.#wallet.has(symbol)
+      ? this.#wallet.get(symbol)
+      : { symbol, type: 'none', available: Big(0), balance: Big(0) };
   }
 
   has(symbol: string): boolean {
@@ -123,6 +126,7 @@ class Wallet {
     const prevBalance = this.get(symbol)?.balance ?? Big(0);
 
     this.#wallet.set(symbol, {
+      symbol,
       type: supportedCurrencies.includes(symbol) ? 'currency' : 'coin',
       available: amount.plus(prevAvailable),
       balance: amount.plus(prevBalance),

@@ -13,7 +13,7 @@
   let total: Big;
 
   let available: Asset;
-  $: available = $wallet.get(quote);
+  $: available = $wallet.get(mode === 'buy' ? quote : base);
 
   function updateInput(
     which: 'quotePrice' | 'amount' | 'total',
@@ -69,14 +69,18 @@
   <div class="flex items-center">
     <button
       class:active={mode === 'buy'}
-      class="btn btn-buy"
+      class:btn-green={mode === 'buy'}
+      class:btn-bordered={mode !== 'buy'}
+      class="btn mode-btn"
       on:click={() => (mode = 'buy')}
     >
       Buy
     </button>
     <button
       class:active={mode === 'sell'}
-      class="btn btn-sell"
+      class:btn-red={mode === 'sell'}
+      class:btn-bordered={mode !== 'sell'}
+      class="btn mode-btn"
       on:click={() => (mode = 'sell')}
     >
       Sell
@@ -84,12 +88,12 @@
   </div>
 
   <div class="flex items-center justify-between text-sm">
-    <span>
-      <Icon class="inline mr-2" name="wallet-outline" />
+    <span class="flex items-center">
+      <Icon class="mr-2" name="wallet-outline" />
       {available ? 'Available' : 'N/A'}
     </span>
     {#if available}
-      <p>{available?.available} {quote}</p>
+      <p>{available?.available} {available?.symbol}</p>
     {/if}
   </div>
 
@@ -122,9 +126,10 @@
   </div>
 
   <button
-    class:btn-buy={mode === 'buy'}
-    class:btn-sell={mode === 'sell'}
-    class="capitalize rounded-lg active btn"
+    class:btn-green={mode === 'buy'}
+    class:btn-red={mode === 'sell'}
+    class="btn btn-lg capitalize"
+    disabled={!total || total?.eq(0)}
     on:click={placeOrder}
   >
     {mode}
@@ -133,28 +138,17 @@
 </div>
 
 <style lang="postcss">
-  .btn {
-    @apply py-2 w-full border border-transparent cursor-default;
+  .mode-btn {
+    @apply w-full rounded-none border-n300 hover:border-n300;
+  }
+  .mode-btn:not(.btn-bordered) {
+    @apply w-full border border-transparent;
   }
 
-  .btn:not(.active) {
-    @apply border-n300;
-  }
-  .btn:not(.active):hover {
-    @apply bg-n100;
-  }
-
-  .btn-buy.active {
-    @apply bg-g500;
-  }
-  .btn-sell.active {
-    @apply bg-r500;
-  }
-
-  .btn:first-child {
+  .mode-btn:first-child {
     @apply rounded-l-md border-r-0;
   }
-  .btn:last-child {
+  .mode-btn:last-child {
     @apply rounded-r-md border-l-0;
   }
 </style>
