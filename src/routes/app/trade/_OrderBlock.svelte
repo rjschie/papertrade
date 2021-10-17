@@ -54,11 +54,11 @@
 
     $wallet.convert(
       {
-        coin: quote,
+        symbol: quote,
         amount: total,
       },
       {
-        coin: base,
+        symbol: base,
         amount: amount,
       }
     );
@@ -89,7 +89,7 @@
       {available ? 'Available' : 'N/A'}
     </span>
     {#if available}
-      <p>{available?.amount} {quote}</p>
+      <p>{available?.available} {quote}</p>
     {/if}
   </div>
 
@@ -124,7 +124,7 @@
   <button
     class:btn-buy={mode === 'buy'}
     class:btn-sell={mode === 'sell'}
-    class="active capitalize btn rounded-lg"
+    class="capitalize rounded-lg active btn"
     on:click={placeOrder}
   >
     {mode}

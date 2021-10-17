@@ -3,7 +3,56 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
-  @apply font-body text-n900;
+@layer base {
+  html,
+  body {
+    @apply font-body text-n900;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply bg-b300 text-n0 px-3 py-1 rounded-md flex items-center justify-center;
+    @apply hover:bg-b500;
+  }
+
+  .btn:disabled {
+    @apply opacity-50 pointer-events-none cursor-default;
+  }
+
+  .btn-lg {
+    @apply px-4 py-2;
+  }
+
+  .btn-red {
+    @apply bg-r300;
+    @apply hover:bg-r500;
+  }
+  .btn-green {
+    @apply bg-g300;
+    @apply hover:bg-g500;
+  }
+
+  .btn-bordered {
+    @apply bg-transparent text-n900 border border-n500;
+    @apply hover:bg-n100 hover:border-n900;
+  }
+
+  .active-icon {
+    @apply relative;
+  }
+  .active-icon > * {
+    @apply relative;
+  }
+  .active-icon::before {
+    content: '';
+    @apply absolute -inset-1 rounded-full bg-n300;
+    @apply transition scale-0 opacity-0 duration-150 ease-out;
+  }
+  .active-icon:hover::before {
+    @apply opacity-50 scale-100;
+  }
+  .active-icon:active::before {
+    @apply opacity-80 scale-90;
+  }
 }

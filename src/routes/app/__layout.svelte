@@ -6,9 +6,7 @@
   <TradeHeader />
 </div>
 
-<main class="h-full">
-  <slot />
-</main>
+<slot />
 
 <style lang="postcss">
   :global(html, body) {

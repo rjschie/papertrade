@@ -19,7 +19,15 @@
   function replaceSvgClass(svg: string): string {
     let newCls = cls;
     if (!cls.includes('w-') && !cls.includes('h-')) {
-      newCls += ' w-6 h-6';
+      newCls += ' w-5 h-5';
+    }
+
+    if (!cls.includes('block') && !cls.includes('inline')) {
+      newCls += ' inline-block';
+    }
+
+    if (!cls.includes('fill')) {
+      newCls += ' fill-current';
     }
 
     if (svg?.includes('class')) {
@@ -27,6 +35,7 @@
     } else {
       svg = svg.replace('<svg', `<svg class="${newCls}"`);
     }
+
     return svg ?? '';
   }
 

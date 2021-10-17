@@ -2,7 +2,7 @@
   let cls = '';
   export { cls as class };
   export let name: string;
-  export let value: string | number | undefined;
+  export let value: string | number | undefined = '';
   export let label = '';
   export let rightLabel = '';
 </script>
