@@ -2,6 +2,7 @@
   import Icon from '$lib/components/Icon.svelte';
   import Input from '$lib/components/Input.svelte';
   import Big from 'big.js';
+  import { Asset, wallet } from '$lib/stores/wallet';
 
   export let base: string;
   export let quote: string;
@@ -11,7 +12,13 @@
   let amount: Big;
   let total: Big;
 
-  function updateInput(which, e: Event): void {
+  let available: Asset;
+  $: available = $wallet.get(quote);
+
+  function updateInput(
+    which: 'quotePrice' | 'amount' | 'total',
+    e: Event
+  ): void {
     let val: Big;
     try {
       val = Big((e.target as HTMLInputElement).value);
@@ -41,18 +48,35 @@
         break;
     }
   }
+
+  function placeOrder() {
+    if (!amount || !total) return;
+
+    $wallet.convert(
+      {
+        coin: quote,
+        amount: total,
+      },
+      {
+        coin: base,
+        amount: amount,
+      }
+    );
+  }
 </script>
 
-<div class="flex flex-col p-4 border rounded-lg border-n100 space-y-4">
+<div class="flex flex-col p-4 space-y-4">
   <div class="flex items-center">
     <button
-      class="btn btn-buy {mode === 'buy' && 'active'}"
+      class:active={mode === 'buy'}
+      class="btn btn-buy"
       on:click={() => (mode = 'buy')}
     >
       Buy
     </button>
     <button
-      class="btn btn-sell {mode === 'sell' && 'active'}"
+      class:active={mode === 'sell'}
+      class="btn btn-sell"
       on:click={() => (mode = 'sell')}
     >
       Sell
@@ -60,8 +84,13 @@
   </div>
 
   <div class="flex items-center justify-between text-sm">
-    <span><Icon class="inline mr-2" name="wallet-outline" /> Available</span>
-    <p>3000 {quote}</p>
+    <span>
+      <Icon class="inline mr-2" name="wallet-outline" />
+      {available ? 'Available' : 'N/A'}
+    </span>
+    {#if available}
+      <p>{available?.amount} {quote}</p>
+    {/if}
   </div>
 
   <div class="space-y-2">
@@ -93,9 +122,10 @@
   </div>
 
   <button
-    class="{mode === 'buy'
-      ? 'btn-buy active'
-      : 'btn-sell active'} capitalize btn rounded-lg"
+    class:btn-buy={mode === 'buy'}
+    class:btn-sell={mode === 'sell'}
+    class="active capitalize btn rounded-lg"
+    on:click={placeOrder}
   >
     {mode}
     {base}

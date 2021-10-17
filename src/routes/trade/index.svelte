@@ -1,18 +1,27 @@
 <script>
-  import OrderBlock from '$lib/components/OrderBlock.svelte';
+  import TradeHeader from './_TradeHeader.svelte';
+  import KLineChart from './_KLineChart.svelte';
+  import OrderBlock from './_OrderBlock.svelte';
+  import OrderInfo from './_OrderInfo.svelte';
 </script>
 
 <svelte:head>
   <title>Trade | PaperTrade</title>
 </svelte:head>
 
-<div class="trading-grid">
-  <div style="grid-area: header;">Header</div>
-  <div style="grid-area: chart;">Chart</div>
-  <div style="grid-area: orderblock;">
+<div class="x-trading-grid">
+  <div class="border-b x-border-color" style="grid-area: header;">
+    <TradeHeader />
+  </div>
+  <div class="border-b x-border-color" style="grid-area: chart;">
+    <KLineChart />
+  </div>
+  <div class="border-l x-border-color" style="grid-area: orderblock;">
     <OrderBlock base="BTC" quote="USD" />
   </div>
-  <div style="grid-area: orderinfo;">Order Info</div>
+  <div class="x-border-color" style="grid-area: orderinfo;">
+    <OrderInfo />
+  </div>
 </div>
 
 <style lang="postcss">
@@ -20,7 +29,7 @@
     @apply h-full;
   }
 
-  .trading-grid {
+  .x-trading-grid {
     @apply h-full w-full grid;
     grid-template-columns: 1fr 16rem;
     grid-template-rows: 4rem 2fr 1fr;
@@ -28,5 +37,9 @@
       'header header'
       'chart orderblock'
       'orderinfo orderblock';
+  }
+
+  .x-border-color {
+    @apply border-n300;
   }
 </style>

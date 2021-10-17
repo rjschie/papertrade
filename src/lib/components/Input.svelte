@@ -8,8 +8,8 @@
 </script>
 
 <label
-  class="{cls} input-grid px-0 py-1 border rounded-md border-n300 focus-within:border-b500 {rightLabel &&
-    'input-grid-3-col'}"
+  class:input-grid-3-col={rightLabel}
+  class="{cls} input-grid px-0 py-1 border rounded-md border-n300 focus-within:border-b500"
   for={name}
 >
   <span class="text-n500">{label}</span>
