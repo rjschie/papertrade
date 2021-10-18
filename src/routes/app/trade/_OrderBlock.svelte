@@ -2,7 +2,8 @@
   import Icon from '$lib/components/Icon.svelte';
   import Input from '$lib/components/Input.svelte';
   import Big from 'big.js';
-  import { Asset, wallet } from '$lib/stores/wallet';
+  import { WalletAsset, wallet } from '$lib/stores/wallet';
+  import { Asset, ledger } from '$lib/stores/ledger';
 
   export let base: string;
   export let quote: string;
@@ -12,7 +13,7 @@
   let amount: Big;
   let total: Big;
 
-  let available: Asset;
+  let available: WalletAsset;
   $: available = $wallet.get(mode === 'buy' ? quote : base);
 
   function updateInput(
@@ -51,17 +52,22 @@
 
   function placeOrder() {
     if (!amount || !total) return;
+    const baseAsset: Asset = {
+      symbol: base,
+      amount: amount,
+    };
+    const quoteAsset: Asset = {
+      symbol: quote,
+      amount: total,
+    };
 
-    $wallet.convert(
-      {
-        symbol: quote,
-        amount: total,
-      },
-      {
-        symbol: base,
-        amount: amount,
-      }
-    );
+    $ledger.add({
+      filled: 0,
+      type: 'order',
+      base: baseAsset,
+      quote: quoteAsset,
+    });
+    $wallet.subtract(quote, total, 'available');
   }
 </script>
 

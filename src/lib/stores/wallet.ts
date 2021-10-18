@@ -1,37 +1,56 @@
+import { Store } from '$lib/stores/store';
 import { browser } from '$app/env';
 import Big from 'big.js';
-import { writable } from 'svelte/store';
-import type { Subscriber, Readable } from 'svelte/store';
 
-export interface Asset {
+export interface WalletAsset {
   symbol: string;
   type: 'currency' | 'coin' | 'none';
   available: Big;
   balance: Big;
 }
 
-export function isAsset(asset: unknown): asset is Asset {
+export function isWalletAsset(asset: unknown): asset is WalletAsset {
   return (
-    (asset as Asset).type !== undefined &&
-    (asset as Asset).available !== undefined &&
-    (asset as Asset).balance !== undefined
+    (asset as WalletAsset).type !== undefined &&
+    (asset as WalletAsset).available !== undefined &&
+    (asset as WalletAsset).balance !== undefined
   );
+}
+
+function createEmptyWalletAsset(symbol: string): [string, WalletAsset] {
+  return [
+    symbol,
+    {
+      available: Big(0),
+      balance: Big(0),
+      symbol,
+      type: 'none',
+    },
+  ];
 }
 
 const supportedCurrencies = ['USD'];
 
-class Wallet {
-  #pauseUpdating = false;
-  #store = writable(this);
-  #wallet: Map<string, Asset>;
+class Wallet extends Store {
+  #wallet: Map<string, WalletAsset>;
 
   constructor() {
+    super();
+
     this.#wallet = new Map();
     if (browser) {
       try {
-        this.#wallet = this._loadStore();
+        const store = this.loadStore();
+        if (store) {
+          this.#wallet = store;
+        } else {
+          this.#wallet = new Map([
+            createEmptyWalletAsset(supportedCurrencies[0]),
+          ]);
+          this.updateStore();
+        }
       } catch (e) {
-        // no op
+        //
       }
     }
   }
@@ -40,56 +59,70 @@ class Wallet {
     return this.#wallet.size;
   }
 
-  get coins(): Array<[string, Asset]> {
+  get coins(): Array<[string, WalletAsset]> {
     return [...this.#wallet.entries()].filter(([, asset]) => {
       return asset.type === 'coin';
     });
   }
 
-  get currencies(): Array<[string, Asset]> {
+  get currencies(): Array<[string, WalletAsset]> {
     return [...this.#wallet.entries()].filter(([, asset]) => {
       return asset.type === 'currency';
     });
   }
 
-  get(symbol: string): Asset {
+  get(symbol: string): WalletAsset {
     return this.#wallet.has(symbol)
       ? this.#wallet.get(symbol)
-      : { symbol, type: 'none', available: Big(0), balance: Big(0) };
+      : createEmptyWalletAsset(symbol)[1];
   }
 
   has(symbol: string): boolean {
     return this.#wallet.has(symbol);
   }
 
-  add(symbol: string, amount: Big): void {
+  add(
+    symbol: string,
+    amount: Big,
+    to: 'available' | 'balance' | 'both' = 'both'
+  ): void {
     if (!(amount instanceof Big)) amount = Big(amount);
-    this._updateAsset(symbol, amount);
+
+    const available = to === 'available' || to === 'both' ? amount : Big(0);
+    const balance = to === 'balance' || to === 'both' ? amount : Big(0);
+
+    this.updateAsset(symbol, available, balance);
   }
 
-  subtract(symbol: string, amount: Big): void {
+  subtract(
+    symbol: string,
+    amount: Big,
+    from: 'available' | 'balance' | 'both' = 'both'
+  ): void {
     if (!(amount instanceof Big)) amount = Big(amount);
-    this._updateAsset(symbol, amount.mul(-1));
+
+    const available =
+      from === 'available' || from === 'both' ? amount.mul(-1) : Big(0);
+    const balance =
+      from === 'balance' || from === 'both' ? amount.mul(-1) : Big(0);
+
+    this.updateAsset(symbol, available, balance);
   }
 
   convert(
     from: { symbol: string; amount: Big },
     to: { symbol: string; amount: Big }
   ): void {
-    this.#pauseUpdating = true;
+    this.pauseUpdating = true;
 
     this.subtract(from.symbol, from.amount);
     this.add(to.symbol, to.amount);
 
-    this.#pauseUpdating = false;
-    this._updateStore();
+    this.pauseUpdating = false;
+    this.updateStore();
   }
 
-  subscribe(subscriber: Subscriber<this>) {
-    return this.#store.subscribe(subscriber);
-  }
-
-  toJSON() {
+  private toJSON(): string {
     try {
       return JSON.stringify(Object.fromEntries(this.#wallet.entries()));
     } catch (e) {
@@ -97,12 +130,12 @@ class Wallet {
     }
   }
 
-  private _loadStore() {
+  private loadStore(): Map<string, WalletAsset> | undefined {
     const json = JSON.parse(localStorage.getItem('wallet'));
     const entries = Object.entries(json ?? {});
-    const assetEntries = entries.reduce<Array<[string, Asset]>>(
+    const assetEntries = entries.reduce<Array<[string, WalletAsset]>>(
       (sum, [symbol, asset]) => {
-        if (!isAsset(asset)) return sum;
+        if (!isWalletAsset(asset)) return sum;
         return [
           ...sum,
           [
@@ -118,30 +151,29 @@ class Wallet {
       []
     );
 
-    return new Map(assetEntries);
+    return assetEntries.length ? new Map(assetEntries) : undefined;
   }
 
-  private _updateAsset(symbol: string, amount: Big) {
+  private updateAsset(symbol: string, available: Big, balance: Big): void {
     const prevAvailable = this.get(symbol)?.available ?? Big(0);
     const prevBalance = this.get(symbol)?.balance ?? Big(0);
 
     this.#wallet.set(symbol, {
       symbol,
       type: supportedCurrencies.includes(symbol) ? 'currency' : 'coin',
-      available: amount.plus(prevAvailable),
-      balance: amount.plus(prevBalance),
+      available: available.plus(prevAvailable),
+      balance: balance.plus(prevBalance),
     });
 
-    this._updateStore();
+    this.updateStore();
   }
 
-  private _updateStore() {
-    if (this.#pauseUpdating) return;
+  updateStore(): void {
+    super.updateStore();
     if (browser) {
       localStorage.setItem('wallet', this.toJSON());
     }
-    this.#store.set(this);
   }
 }
 
-export const wallet: Readable<Wallet> = new Wallet();
+export const wallet = new Wallet();

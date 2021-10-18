@@ -1,11 +1,11 @@
 <script lang="ts">
   import { currency } from '$lib/helpers/format';
-  import type { Asset } from '$lib/stores/wallet';
+  import type { WalletAsset } from '$lib/stores/wallet';
 
   let cls = '';
   export { cls as class };
   export let type: 'currency' | 'coin';
-  export let assets: Array<[string, Asset]>;
+  export let assets: Array<[string, WalletAsset]>;
 </script>
 
 <table class="{cls} w-full">

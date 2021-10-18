@@ -6,6 +6,8 @@
   import { currency } from '$lib/helpers/format';
   import { wallet } from '$lib/stores/wallet';
   import Big from 'big.js';
+  import { ledger } from '$lib/stores/ledger';
+  import DepositWithdrawalTable from '$lib/components/DepositWithdrawalTable.svelte';
 
   let showDepositModal = false;
   let showWithdrawModal = false;
@@ -23,30 +25,58 @@
 
   function transact(invert) {
     $wallet.add(symbol, invert ? amount.mul(-1) : amount);
+    $ledger.add({
+      type: invert ? 'withdrawal' : 'deposit',
+      filled: 100,
+      base: {
+        symbol,
+        amount,
+      },
+    });
     closeModal();
   }
 </script>
 
-<main class="w-4/5 px-6 mx-auto mt-6">
-  <div class="flex items-center">
-    <h2 class="text-xl font-bold">Assets</h2>
-    <button class="ml-auto mr-2 btn" on:click={() => (showDepositModal = true)}>
-      <Icon class="mr-2 text-b100" name="wallet" />
-      Deposit
-    </button>
-    <button
-      class="btn btn-bordered"
-      on:click={() => (showWithdrawModal = true)}
-    >
-      Withdraw
-    </button>
-  </div>
-  {#if $wallet.currencies?.length}
-    <WalletTable class="mb-6" type="currency" assets={$wallet.currencies} />
-  {/if}
-  {#if $wallet.coins?.length}
-    <WalletTable type="coin" assets={$wallet.coins} />
-  {/if}
+<main class="w-4/5 px-6 mx-auto mt-6 pb-20">
+  <section style="min-height: 20rem;">
+    <div class="flex items-center">
+      <h2 class="text-xl font-bold">Assets</h2>
+      <button
+        class="ml-auto mr-2 btn"
+        on:click={() => (showDepositModal = true)}
+      >
+        <Icon class="mr-2 text-b100" name="wallet" />
+        Deposit
+      </button>
+      <button
+        class="btn btn-bordered"
+        on:click={() => (showWithdrawModal = true)}
+      >
+        Withdraw
+      </button>
+    </div>
+
+    {#if $wallet.currencies?.length}
+      <WalletTable class="mb-6" type="currency" assets={$wallet.currencies} />
+    {/if}
+    {#if $wallet.coins?.length}
+      <WalletTable type="coin" assets={$wallet.coins} />
+    {/if}
+  </section>
+
+  <section class="mt-6">
+    <div class="flex items-center">
+      <h2 class="text-xl font-bold">Transaction History</h2>
+    </div>
+
+    {#if $ledger.depositsAndWithdrawals.length}
+      <DepositWithdrawalTable
+        transactions={$ledger.depositsAndWithdrawals.sort(
+          (a, b) => b.timestamp - a.timestamp
+        )}
+      />
+    {/if}
+  </section>
 </main>
 
 {#if showDepositModal || showWithdrawModal}

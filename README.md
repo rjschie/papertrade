@@ -21,5 +21,10 @@
     - use global "context" store
   - [ ] table sorting
   - [ ] "App feel"
+    - [ ] Local storage listeners
 - [ ] KLines
 - [ ] Reconcile while page loaded
+
+#### TODO persistence
+
+- [ ] Serverless API
