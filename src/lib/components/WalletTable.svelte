@@ -24,18 +24,18 @@
     </tr>
   </thead>
   <tbody class="text-lg">
-    {#each assets as [symbol, asset]}
+    {#each assets as [symbol, asset] (symbol)}
       <tr class="border-t border-b">
         <td>{symbol}</td>
         <td class="text-right">
           {type === 'currency'
             ? currency.format(symbol, asset.balance)
-            : asset.balance.toString()}
+            : asset.balance}
         </td>
         <td class="text-right">
           {type === 'currency'
             ? currency.format(symbol, asset.available)
-            : asset.available.toString()}
+            : asset.available}
         </td>
         <td />
       </tr>

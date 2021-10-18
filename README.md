@@ -9,19 +9,27 @@
 #### TODO
 
 - [x] Add wallet (add funds)
-- [ ] Add transaction history (deposits & trades)
-- [ ] Add open orders
-- [ ] Reconcile on page load
-- [ ] Trade more pairs
+- [x] Add transaction history (deposits & trades)
+- [x] Add open orders
 - Misc. improvements
-  - [ ] Form validation
-    - [ ] order book
-    - [ ] wallet deposit / withdraw
+  - [ ] Table component
+    - table sorting
   - [ ] Modal tabbing
     - use global "context" store
-  - [ ] table sorting
-  - [ ] "App feel"
-    - [ ] Local storage listeners
+  - [ ] "App feel"?
+    - no cursors, clearer click targets
+    - onload shouldn't snap CSS
+  - Form revamp
+    - [ ] semantic
+    - [ ] clearing inputs
+    - [ ] validation component
+    - [ ] validate available balances
+  - [ ] Local storage listeners
+  - [ ] Notifier system
+- [ ] Trade more pairs
+- [ ] Reconcile on page load
+- [ ] Sub-transactions for filling
+  - maybe make orders a separate data struct?
 - [ ] KLines
 - [ ] Reconcile while page loaded
 

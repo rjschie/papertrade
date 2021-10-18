@@ -16,7 +16,7 @@
   <div class="border-l x-border-color" style="grid-area: orderblock;">
     <OrderBlock base={$tradeContext.baseCoin} quote={$tradeContext.quoteCoin} />
   </div>
-  <div class="x-border-color" style="grid-area: orderinfo;">
+  <div class="x-border-color overflow-y-scroll" style="grid-area: orderinfo;">
     <OrderInfo />
   </div>
 </div>
@@ -24,8 +24,9 @@
 <style lang="postcss">
   .x-trading-grid {
     @apply h-full w-full grid;
+    height: calc(100% - 4rem);
     grid-template-columns: 1fr 16rem;
-    grid-template-rows: 2fr 1fr;
+    grid-template-rows: 2fr minmax(8rem, 1fr);
     grid-template-areas:
       'chart orderblock'
       'orderinfo orderblock';

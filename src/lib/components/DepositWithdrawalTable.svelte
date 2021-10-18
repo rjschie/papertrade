@@ -21,7 +21,7 @@
     </tr>
   </thead>
   <tbody class="text-lg">
-    {#each transactions as transaction}
+    {#each transactions as transaction (transaction.id)}
       <tr class="border-t border-b">
         <td>{transaction.timestamp}</td>
         <td class="text-left">
