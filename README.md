@@ -26,6 +26,7 @@
     - [ ] validate available balances
   - [ ] Local storage listeners
   - [ ] Notifier system
+- [ ] Order vs Deposit/Withdraw stores
 - [ ] Trade more pairs
 - [ ] Reconcile on page load
 - [ ] Sub-transactions for filling
