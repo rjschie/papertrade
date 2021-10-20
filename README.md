@@ -12,14 +12,10 @@
 - [x] Add transaction history (deposits & trades)
 - [x] Add open orders
 - Misc. improvements
-  - [ ] Table component
-    - table sorting
-  - [ ] Modal tabbing
-    - use global "context" store
-  - [ ] "App feel"?
-    - no cursors, clearer click targets
-    - onload shouldn't snap CSS
-  - Form revamp
+  - [x] Table component
+  - [x] Table sorting
+  - [ ] Accessibility
+  - Form revamps
     - [ ] semantic
     - [ ] clearing inputs
     - [ ] validation component

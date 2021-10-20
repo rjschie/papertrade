@@ -2,12 +2,12 @@ import { Store } from '$lib/stores/store';
 import { browser } from '$app/env';
 import Big from 'big.js';
 
-export interface WalletAsset {
+export type WalletAsset = {
   symbol: string;
   type: 'currency' | 'coin' | 'none';
   available: Big;
   balance: Big;
-}
+};
 
 export function isWalletAsset(asset: unknown): asset is WalletAsset {
   return (

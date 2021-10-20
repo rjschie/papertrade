@@ -2,19 +2,19 @@ import { browser } from '$app/env';
 import { Store } from '$lib/stores/store';
 import Big from 'big.js';
 
-export interface Asset {
+export type Asset = {
   symbol: string;
   amount: Big;
-}
+};
 
-export interface Transaction {
+export type Transaction = {
   id: string;
   timestamp: number;
   base: Asset;
   quote?: Asset;
   type: 'order' | 'deposit' | 'withdrawal';
   filled: number; // 0 - 100%
-}
+};
 
 function isTransaction(t: unknown): t is Transaction {
   return (

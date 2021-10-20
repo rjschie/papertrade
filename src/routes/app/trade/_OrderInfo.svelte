@@ -1,46 +1,31 @@
 <script lang="ts">
-  import { base } from '$app/paths';
+  import DataTable from '$lib/components/DataTable.svelte';
   import { ledger } from '$lib/stores/ledger';
+  import dayjs from 'dayjs';
 
   let cls = '';
   export { cls as class };
+
+  const headers = [
+    { key: 'date', label: 'Date / Time', sortKey: 'timestamp' },
+    { key: 'amount', class: 'text-right' },
+    { key: 'total', class: 'text-right' },
+    '',
+  ];
+  let data: typeof ledger.orders;
+  $: data = $ledger.orders.map((d) => ({
+    ...d,
+    date: dayjs(d.timestamp).format('MM-DD-YYYY / HH:mm:ss'),
+    amount: `${d.base.amount} ${d.base.symbol}`,
+    total: `${d.quote.amount} ${d.quote.symbol}`,
+  }));
 </script>
 
-<table class="{cls} text-sm w-full">
-  <colgroup>
-    <col class="w-1/4" />
-    <col class="w-1/4" />
-    <col class="w-1/4" />
+<DataTable class="{cls} w-full text-sm" {headers} {data}>
+  <colgroup slot="colgroup">
+    <col class="w-56" />
+    <col class="w-auto" />
+    <col class="w-auto" />
     <col class="w-1/4" />
   </colgroup>
-  <thead class="sticky top-0 bg-n0">
-    <tr>
-      <th class="text-left">Date</th>
-      <th class="text-right">Amount</th>
-      <th class="text-right">Total</th>
-      <th />
-    </tr>
-  </thead>
-  <tbody>
-    {#each $ledger.orders as order (order.id)}
-      <tr>
-        <td>{order.timestamp}</td>
-        <td class="text-right">{order.base.amount} {order.base.symbol}</td>
-        <td class="text-right">{order.quote.amount} {order.quote.symbol}</td>
-        <td />
-      </tr>
-    {/each}
-  </tbody>
-</table>
-
-<style lang="postcss">
-  tbody td,
-  thead th {
-    @apply px-2 py-1;
-  }
-
-  tbody tr:nth-child(2n + 1) {
-    @apply bg-n50;
-  }
-  /**/
-</style>
+</DataTable>
