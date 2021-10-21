@@ -1,13 +1,14 @@
 <script lang="ts">
   import Icon from '$lib/components/Icon.svelte';
   import Input from '$lib/components/Input.svelte';
-  import WalletTable from '$lib/components/WalletTable.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import { currency } from '$lib/helpers/format';
   import { wallet } from '$lib/stores/wallet';
   import Big from 'big.js';
   import { ledger } from '$lib/stores/ledger';
-  import DepositWithdrawalTable from '$lib/components/DepositWithdrawalTable.svelte';
+  import DataTable from '$lib/components/DataTable.svelte';
+  import dayjs from 'dayjs';
+  import { DateTime } from '$lib/constants/date';
 
   let showDepositModal = false;
   let showWithdrawModal = false;
@@ -38,8 +39,8 @@
 </script>
 
 <main class="w-4/5 px-6 mx-auto mt-6 pb-20">
-  <section style="min-height: 20rem;">
-    <div class="flex items-center">
+  <section>
+    <div class="flex items-center mb-6">
       <h2 class="text-xl font-bold">Assets</h2>
       <button
         class="ml-auto mr-2 btn"
@@ -56,25 +57,93 @@
       </button>
     </div>
 
-    {#if $wallet.currencies?.length}
-      <WalletTable class="mb-6" type="currency" assets={$wallet.currencies} />
-    {/if}
-    {#if $wallet.coins?.length}
-      <WalletTable type="coin" assets={$wallet.coins} />
-    {/if}
+    {#each [$wallet.currencies, $wallet.coins] as assetStore}
+      {#if assetStore?.length}
+        <DataTable
+          class="w-full mb-8"
+          sorting={false}
+          theadBorder={false}
+          rowAlternating={false}
+          columns={[
+            { key: 'symbol', label: '' },
+            { key: 'balance', class: 'text-right' },
+            {
+              key: 'available',
+              label: 'Available Balance',
+              class: 'text-right',
+            },
+            '',
+          ]}
+          data={assetStore.map(([, asset]) => ({
+            ...asset,
+            ...(asset.type === 'currency' && {
+              balance: currency.format(asset.symbol, asset.balance),
+            }),
+            ...(asset.type === 'currency' && {
+              available: currency.format(asset.symbol, asset.available),
+            }),
+          }))}
+        >
+          <td
+            slot="cell"
+            class="{cls} px-2 py-3 border-b border-t border-n500"
+            let:class={cls}
+            let:data
+          >
+            {data ?? ''}
+          </td>
+          <colgroup slot="colgroup">
+            <col class="w-1/4" />
+            <col class="w-1/4" />
+            <col class="w-1/4" />
+            <col class="w-1/4" />
+          </colgroup>
+        </DataTable>
+      {/if}
+    {/each}
   </section>
 
-  <section class="mt-6">
-    <div class="flex items-center">
+  <section class="mt-32">
+    <div class="flex items-center mb-6">
       <h2 class="text-xl font-bold">Transaction History</h2>
     </div>
 
     {#if $ledger.depositsAndWithdrawals.length}
-      <DepositWithdrawalTable
-        transactions={$ledger.depositsAndWithdrawals.sort(
-          (a, b) => b.timestamp - a.timestamp
-        )}
-      />
+      <DataTable
+        class="w-full mt-6"
+        sorting={false}
+        theadClass="text-sm"
+        theadBorder={false}
+        rowAlternating={false}
+        columns={[
+          { key: 'date', class: '!px-2 !py-3' },
+          { key: 'type', class: '!px-2 !py-3' },
+          { key: 'amount', class: 'text-right !px-2 !py-3' },
+          '',
+        ]}
+        data={$ledger.depositsAndWithdrawals
+          .sort((a, b) => b.timestamp - a.timestamp)
+          .map((d) => ({
+            ...d,
+            date: dayjs(d.timestamp).format(DateTime),
+            amount: currency.format(d.base.symbol, d.base.amount),
+          }))}
+      >
+        <td
+          slot="cell"
+          class="{cls} border-t border-b"
+          let:class={cls}
+          let:data
+        >
+          {data ?? ''}
+        </td>
+        <colgroup slot="colgroup">
+          <col class="w-1/4" />
+          <col class="w-1/4" />
+          <col class="w-1/4" />
+          <col class="w-1/4" />
+        </colgroup>
+      </DataTable>
     {/if}
   </section>
 </main>

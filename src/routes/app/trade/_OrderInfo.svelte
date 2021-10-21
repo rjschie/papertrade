@@ -1,12 +1,13 @@
 <script lang="ts">
   import DataTable from '$lib/components/DataTable.svelte';
+  import { DateTime } from '$lib/constants/date';
   import { ledger } from '$lib/stores/ledger';
   import dayjs from 'dayjs';
 
   let cls = '';
   export { cls as class };
 
-  const headers = [
+  const columns = [
     { key: 'date', label: 'Date / Time', sortKey: 'timestamp' },
     { key: 'amount', class: 'text-right' },
     { key: 'total', class: 'text-right' },
@@ -15,13 +16,13 @@
   let data: typeof ledger.orders;
   $: data = $ledger.orders.map((d) => ({
     ...d,
-    date: dayjs(d.timestamp).format('MM-DD-YYYY / HH:mm:ss'),
+    date: dayjs(d.timestamp).format(DateTime),
     amount: `${d.base.amount} ${d.base.symbol}`,
     total: `${d.quote.amount} ${d.quote.symbol}`,
   }));
 </script>
 
-<DataTable class="{cls} w-full text-sm" {headers} {data}>
+<DataTable class="{cls} w-full text-sm" {columns} {data}>
   <colgroup slot="colgroup">
     <col class="w-56" />
     <col class="w-auto" />
