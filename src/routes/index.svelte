@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>PaperTrade</title>
+  <title>Paper Trade</title>
 </svelte:head>
 
 <main class="flex flex-col h-full items-center justify-center">

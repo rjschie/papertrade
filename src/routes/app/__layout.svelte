@@ -2,9 +2,9 @@
   import TradeHeader from './_TradeHeader.svelte';
 </script>
 
-<div class="border-b border-n300 h-16">
+<header class="border-b border-n300 h-16">
   <TradeHeader />
-</div>
+</header>
 
 <slot />
 

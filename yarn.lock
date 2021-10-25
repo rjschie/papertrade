@@ -1684,6 +1684,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"focus-trap@npm:^6.7.1":
+  version: 6.7.1
+  resolution: "focus-trap@npm:6.7.1"
+  dependencies:
+    tabbable: ^5.2.1
+  checksum: b96c54a6a2976f8509ed8447ce3a8b76db3801b9c170f278f60b0c878478f2bb2ebc6dbe3ccd7157006b9a7ad9a86c18283efff0f3e387e29ba3ea89d8687b9c
+  languageName: node
+  linkType: hard
+
 "fraction.js@npm:^4.1.1":
   version: 4.1.1
   resolution: "fraction.js@npm:4.1.1"
@@ -2665,6 +2674,7 @@ fsevents@~2.3.2:
     eslint: ^7.32.0
     eslint-config-prettier: ^8.3.0
     eslint-plugin-svelte3: ^3.2.1
+    focus-trap: ^6.7.1
     postcss: ^8.3.9
     postcss-load-config: ^3.1.0
     prettier: ^2.4.1
@@ -3788,6 +3798,13 @@ resolve@^1.20.0:
   bin:
     svgo: bin/svgo
   checksum: 7da6574958185368356d1e0f50d7860afc01d9fffb0f75c8aab87d1af237d27d8a838c7f09e6829a0e81b1952cf6c4e12abe1bd3920a526ea0f0ca9dd1cd59c5
+  languageName: node
+  linkType: hard
+
+"tabbable@npm:^5.2.1":
+  version: 5.2.1
+  resolution: "tabbable@npm:5.2.1"
+  checksum: d26e9eeb880c4c78b59244bac2c931ad46f6c64a01e5c15ba6da348dc86442222912733846a9e63373342a81fa15d4afb31267606b38431510d10b0fb9ec9bba
   languageName: node
   linkType: hard
 

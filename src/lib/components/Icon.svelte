@@ -16,7 +16,8 @@
    * Adds to the given svg's `class` attribute with the `cls` prop from this
    * component.
    */
-  function replaceSvgClass(svg: string): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function replaceSvgAttrs(svg: string, props: any = {}): string {
     let newCls = cls;
     if (!cls.includes('w-') && !cls.includes('h-')) {
       newCls += ' w-5 h-5';
@@ -36,6 +37,13 @@
       svg = svg.replace('<svg', `<svg class="${newCls}"`);
     }
 
+    svg = svg.replace(
+      '<svg',
+      `<svg ${Object.entries(props)
+        .map((s) => `${s[0]}="${s[1]}"`)
+        .join(' ')}`
+    );
+
     return svg ?? '';
   }
 
@@ -53,10 +61,10 @@
 
 {#if coin}
   {#await fetchSvg('coin', coin) then svg}
-    {@html replaceSvgClass(svg)}
+    {@html replaceSvgAttrs(svg, $$restProps)}
   {/await}
 {:else if name}
   {#await fetchSvg('ionic', name) then svg}
-    {@html replaceSvgClass(svg)}
+    {@html replaceSvgAttrs(svg, $$restProps)}
   {/await}
 {/if}

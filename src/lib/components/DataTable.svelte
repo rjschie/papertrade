@@ -67,13 +67,16 @@
   class={cls}
   class:row-alternating={rowAlternating}
   class:thead-border={theadBorder}
+  {...$$restProps}
 >
+  <slot name="caption" />
   <slot name="colgroup" />
   <thead class="{theadClass} sticky top-0 bg-n0 capitalize text-left">
     <tr>
       {#each columns as column}
         <th
           class={isColumnObj(column) ? column.class ?? '' : ''}
+          scope="col"
           on:click={() => {
             if (!column || !sorting) return;
             updateSortKey(getColumnSortKey(column));
@@ -91,7 +94,11 @@
                     class:opacity-20={getColumnSortKey(column) !==
                       sort?.replace('-', '')}
                   >
-                    <Icon class="h-4 w-4" name="caret-down-outline" />
+                    <Icon
+                      class="h-4 w-4"
+                      name="caret-down-outline"
+                      aria-hidden="true"
+                    />
                   </span>
                 </span>
               {/if}
