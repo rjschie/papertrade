@@ -4,6 +4,7 @@
   import Big from 'big.js';
   import { WalletAsset, wallet } from '$lib/stores/wallet';
   import { Asset, ledger } from '$lib/stores/ledger';
+  import { snackbars } from '$lib/stores/context';
 
   export let base: string;
   export let quote: string;
@@ -89,6 +90,8 @@
       quote: quoteAsset,
     });
     $wallet.subtract(quote, total, 'available');
+
+    snackbars.add('Order added.');
 
     quotePrice = null;
     amount = null;

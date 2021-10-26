@@ -3,20 +3,24 @@
   import Input from '$lib/components/Input.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import { currency } from '$lib/helpers/format';
-  import { wallet } from '$lib/stores/wallet';
+  import { wallet, WalletAsset } from '$lib/stores/wallet';
   import Big from 'big.js';
   import { ledger } from '$lib/stores/ledger';
   import DataTable from '$lib/components/DataTable.svelte';
   import dayjs from 'dayjs';
   import { DateTime } from '$lib/constants/date';
+  import { snackbars } from '$lib/stores/context';
 
   let showDepositModal = false;
   let showWithdrawModal = false;
+  let errors: Array<string> = [];
 
   let symbol = 'USD';
   let amountVal = '';
   let amount = Big(0);
   $: amount = amountVal.length ? Big(amountVal) : Big(0);
+  let availableAsset: WalletAsset;
+  $: availableAsset = $wallet.get(symbol);
 
   function closeModal() {
     showDepositModal = false;
@@ -24,7 +28,17 @@
     amountVal = '';
   }
 
-  function transact(this: HTMLFormElement) {
+  function validate(this: HTMLFormElement): boolean {
+    if (showWithdrawModal && amount.gte(availableAsset.available)) {
+      errors = [...errors, 'Unavailable funds'];
+    }
+
+    return !errors.length;
+  }
+
+  function transact(this: HTMLFormElement): void {
+    if (!validate.call(this)) return;
+
     const invert = showWithdrawModal;
     $wallet.add(symbol, invert ? amount.mul(-1) : amount);
     $ledger.add({
@@ -35,6 +49,14 @@
         amount,
       },
     });
+
+    snackbars.add(
+      `${showWithdrawModal ? 'Withdrew' : 'Deposited'} ${currency.format(
+        symbol,
+        amount
+      )}.`
+    );
+
     this.reset?.();
     closeModal();
   }
@@ -178,6 +200,22 @@
           <Icon class="w-6 h-6" name="close-circle-outline" />
         </button>
       </div>
+
+      {#if showWithdrawModal}
+        <div
+          class="flex items-center justify-between text-sm my-3"
+          class:text-r600={availableAsset.available.lte(0)}
+        >
+          <span class="flex items-center">
+            <Icon class="mr-2" name="wallet-outline" />
+            {availableAsset ? 'Available' : 'N/A'}
+          </span>
+          {#if availableAsset}
+            <p>{availableAsset.available} {availableAsset.symbol}</p>
+          {/if}
+        </div>
+      {/if}
+
       <form on:submit|preventDefault={transact}>
         <Input
           name="amount"
@@ -188,7 +226,20 @@
           aria-label="Amount in USD"
           bind:value={amountVal}
         />
-        <button class="w-full mt-8 btn btn-lg" disabled={!amountVal}>
+
+        {#if errors.length}
+          <div class="my-3 p-2 rounded-md bg-r100 border border-r500 text-sm">
+            <ul class="pl-2 space-y-2 text-n700">
+              {#each errors as e}
+                <li class="capitalize">
+                  {e}
+                </li>
+              {/each}
+            </ul>
+          </div>
+        {/if}
+
+        <button class="w-full mt-4 btn btn-lg" disabled={!amountVal}>
           {showDepositModal ? 'Deposit' : 'Withdraw'}
           {currency.format(symbol, amount)}
         </button>

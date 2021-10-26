@@ -8,11 +8,11 @@
 
   onMount(() => {
     trap = createFocusTrap(element);
-    trap.activate();
+    trap?.activate();
   });
 
   onDestroy(() => {
-    trap.deactivate();
+    trap?.deactivate();
   });
 </script>
 

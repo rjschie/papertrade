@@ -20,14 +20,13 @@
     - [x] clearing inputs
     - [x] validation component
     - [x] validate available balances
-  - [ ] Snackbars
+  - [x] Snackbars
 - [ ] Order vs Deposit/Withdraw stores
-- [ ] Trade more pairs
+- [ ] Load Trade pairs
 - [ ] Reconcile on page load
-- [ ] Sub-transactions for filling
-  - maybe make orders a separate data struct?
 - [ ] KLines
-- [ ] Reconcile while page loaded
+- [ ] Animations
+- [ ] Reconcile during page loaded
 
 #### TODO persistence
 
