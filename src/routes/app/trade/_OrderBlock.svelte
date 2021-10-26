@@ -12,9 +12,10 @@
   let quotePrice: Big;
   let amount: Big;
   let total: Big;
+  let errors: Array<{ label: string; message: string }> = [];
 
-  let available: WalletAsset;
-  $: available = $wallet.get(mode === 'buy' ? quote : base);
+  let availableAsset: WalletAsset;
+  $: availableAsset = $wallet.get(mode === 'buy' ? quote : base);
 
   function updateInput(
     which: 'quotePrice' | 'amount' | 'total',
@@ -50,8 +51,28 @@
     }
   }
 
-  function placeOrder() {
-    if (!amount || !total) return;
+  function validate(this: HTMLFormElement): boolean {
+    /** clear errors first */
+    errors = [];
+    if (!amount || !total) return false;
+
+    if (mode === 'sell' && amount.gt(availableAsset.available)) {
+      errors = [
+        ...errors,
+        { label: 'amount', message: `Not enough ${availableAsset.symbol}` },
+      ];
+    }
+
+    if (mode === 'buy' && total.gt(availableAsset.available)) {
+      errors = [...errors, { label: 'total', message: 'Unavailable funds' }];
+    }
+
+    return !errors.length;
+  }
+
+  function placeOrder(this: HTMLFormElement): void {
+    if (!validate.call(this)) return;
+
     const baseAsset: Asset = {
       symbol: base,
       amount: amount,
@@ -68,17 +89,25 @@
       quote: quoteAsset,
     });
     $wallet.subtract(quote, total, 'available');
+
+    quotePrice = null;
+    amount = null;
+    total = null;
+    this.reset();
   }
 </script>
 
-<div class="flex flex-col p-4 space-y-4">
+<div class="flex flex-col p-4">
   <div class="flex items-center">
     <button
       class:active={mode === 'buy'}
       class:btn-green={mode === 'buy'}
       class:btn-bordered={mode !== 'buy'}
       class="btn mode-btn"
-      on:click={() => (mode = 'buy')}
+      on:click={() => {
+        errors = [];
+        mode = 'buy';
+      }}
     >
       Buy
     </button>
@@ -87,60 +116,83 @@
       class:btn-red={mode === 'sell'}
       class:btn-bordered={mode !== 'sell'}
       class="btn mode-btn"
-      on:click={() => (mode = 'sell')}
+      on:click={() => {
+        errors = [];
+        mode = 'sell';
+      }}
     >
       Sell
     </button>
   </div>
 
-  <div class="flex items-center justify-between text-sm">
+  <div
+    class="flex items-center justify-between text-sm my-3"
+    class:text-r600={availableAsset.available.lte(0)}
+  >
     <span class="flex items-center">
       <Icon class="mr-2" name="wallet-outline" />
-      {available ? 'Available' : 'N/A'}
+      {availableAsset ? 'Available' : 'N/A'}
     </span>
-    {#if available}
-      <p>{available?.available} {available?.symbol}</p>
+    {#if availableAsset}
+      <p>{availableAsset.available} {availableAsset.symbol}</p>
     {/if}
   </div>
 
-  <div class="space-y-2">
+  <form on:submit|preventDefault={placeOrder}>
     <Input
       label="Price"
       name="price"
       type="number"
+      min="0"
       rightLabel={quote}
       value={quotePrice?.toString()}
       on:input={(e) => updateInput('quotePrice', e)}
     />
     <Input
+      class="mt-3"
       label="Amount"
       name="amount"
       type="number"
+      min="0"
       rightLabel={base}
       value={amount?.toString()}
       on:input={(e) => updateInput('amount', e)}
     />
 
-    <label class="block" for="total">Total</label>
+    <label class="block mt-3" for="total">Total</label>
     <Input
+      class="mt-1"
       name="total"
       type="number"
+      min="0"
       rightLabel={quote}
       value={total?.toString()}
       on:input={(e) => updateInput('total', e)}
     />
-  </div>
 
-  <button
-    class:btn-green={mode === 'buy'}
-    class:btn-red={mode === 'sell'}
-    class="btn btn-lg capitalize"
-    disabled={!total || total?.eq(0)}
-    on:click={placeOrder}
-  >
-    {mode}
-    {base}
-  </button>
+    {#if errors.length}
+      <div class="my-3 p-2 rounded-md bg-r100 border border-r500 text-sm">
+        <ul class="pl-2 space-y-2 text-n700">
+          {#each errors as e}
+            <li class="capitalize">
+              <span class="font-semibold">{e.label}:</span>
+              {e.message}
+            </li>
+          {/each}
+        </ul>
+      </div>
+    {/if}
+
+    <button
+      class="btn btn-lg mt-3 w-full capitalize"
+      class:btn-green={mode === 'buy'}
+      class:btn-red={mode === 'sell'}
+      disabled={!total || total?.eq(0) || availableAsset.available.lte(0)}
+    >
+      {mode}
+      {base}
+    </button>
+  </form>
 </div>
 
 <style lang="postcss">

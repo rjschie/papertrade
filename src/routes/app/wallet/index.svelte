@@ -24,7 +24,8 @@
     amountVal = '';
   }
 
-  function transact(invert) {
+  function transact(this: HTMLFormElement) {
+    const invert = showWithdrawModal;
     $wallet.add(symbol, invert ? amount.mul(-1) : amount);
     $ledger.add({
       type: invert ? 'withdrawal' : 'deposit',
@@ -34,6 +35,7 @@
         amount,
       },
     });
+    this.reset?.();
     closeModal();
   }
 </script>
@@ -176,12 +178,13 @@
           <Icon class="w-6 h-6" name="close-circle-outline" />
         </button>
       </div>
-      <form on:submit|preventDefault={() => transact(showWithdrawModal)}>
+      <form on:submit|preventDefault={transact}>
         <Input
-          type="number"
           name="amount"
           label="Amount"
           rightLabel="USD"
+          type="number"
+          min="0"
           aria-label="Amount in USD"
           bind:value={amountVal}
         />

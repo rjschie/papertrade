@@ -16,10 +16,10 @@
   - [x] Table sorting
   - [~] Accessibility
   - Form revamps
-    - [ ] semantic
-    - [ ] clearing inputs
-    - [ ] validation component
-    - [ ] validate available balances
+    - [x] semantic
+    - [x] clearing inputs
+    - [x] validation component
+    - [x] validate available balances
   - [ ] Snackbars
 - [ ] Order vs Deposit/Withdraw stores
 - [ ] Trade more pairs

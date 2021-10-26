@@ -15,6 +15,7 @@
   <span class="text-n500">{label}</span>
   <input
     id={name}
+    {name}
     class="min-w-0 outline-none text-right"
     bind:value
     on:input
