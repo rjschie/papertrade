@@ -1,19 +1,39 @@
-import { Store } from '$lib/stores/store';
 import { browser } from '$app/env';
 import Big from 'big.js';
+import MapStore from '$lib/stores/utils/map-store';
+import SetStore from '$lib/stores/utils/set-store';
+import { SupportedCurrencies } from '$lib/constants/currencies';
+import type { Asset } from '$types/asset';
 
 export type WalletAsset = {
   symbol: string;
-  type: 'currency' | 'coin' | 'none';
+  type: 'currency' | 'coin';
   available: Big;
   balance: Big;
 };
 
+export type WalletHistoryTransaction = Asset & {
+  id: string;
+  timestamp: number;
+  type: 'deposit' | 'withdraw';
+};
+
 export function isWalletAsset(asset: unknown): asset is WalletAsset {
   return (
+    (asset as WalletAsset).symbol !== undefined &&
     (asset as WalletAsset).type !== undefined &&
     (asset as WalletAsset).available !== undefined &&
     (asset as WalletAsset).balance !== undefined
+  );
+}
+
+export function isWalletHistoryTransaction(
+  asset: unknown
+): asset is WalletHistoryTransaction {
+  return (
+    (asset as WalletHistoryTransaction).id !== undefined &&
+    (asset as WalletHistoryTransaction).timestamp !== undefined &&
+    (asset as WalletHistoryTransaction).type !== undefined
   );
 }
 
@@ -24,64 +44,45 @@ function createEmptyWalletAsset(symbol: string): [string, WalletAsset] {
       available: Big(0),
       balance: Big(0),
       symbol,
-      type: 'none',
+      type: 'currency',
     },
   ];
 }
 
-const supportedCurrencies = ['USD'];
-
-class Wallet extends Store {
-  #wallet: Map<string, WalletAsset>;
-
+class Wallet extends MapStore<WalletAsset> {
   constructor() {
-    super();
+    super('wallet');
 
-    this.#wallet = new Map();
-    if (browser) {
-      try {
-        const store = this.loadStore();
-        if (store) {
-          this.#wallet = store;
-        } else {
-          this.#wallet = new Map([
-            createEmptyWalletAsset(supportedCurrencies[0]),
-          ]);
-          this.updateStore();
-        }
-      } catch (e) {
-        //
-      }
+    if (browser && !this.store.size) {
+      console.log('no store, setting up');
+      this.store = new Map([createEmptyWalletAsset(SupportedCurrencies[0])]);
+      this.updateStore();
     }
   }
 
-  get size() {
-    return this.#wallet.size;
-  }
-
   get coins(): Array<[string, WalletAsset]> {
-    return [...this.#wallet.entries()].filter(([, asset]) => {
+    return this.entries.filter(([, asset]) => {
       return asset.type === 'coin';
     });
   }
 
   get currencies(): Array<[string, WalletAsset]> {
-    return [...this.#wallet.entries()].filter(([, asset]) => {
+    return this.entries.filter(([, asset]) => {
       return asset.type === 'currency';
     });
   }
 
   get(symbol: string): WalletAsset {
-    return this.#wallet.has(symbol)
-      ? this.#wallet.get(symbol)
+    return this.store.has(symbol)
+      ? this.store.get(symbol)
       : createEmptyWalletAsset(symbol)[1];
   }
 
   has(symbol: string): boolean {
-    return this.#wallet.has(symbol);
+    return this.store.has(symbol);
   }
 
-  add(
+  deposit(
     symbol: string,
     amount: Big,
     to: 'available' | 'balance' | 'both' = 'both'
@@ -92,9 +93,10 @@ class Wallet extends Store {
     const balance = to === 'balance' || to === 'both' ? amount : Big(0);
 
     this.updateAsset(symbol, available, balance);
+    walletHistory.add('deposit', { symbol, amount });
   }
 
-  subtract(
+  withdraw(
     symbol: string,
     amount: Big,
     from: 'available' | 'balance' | 'both' = 'both'
@@ -107,60 +109,26 @@ class Wallet extends Store {
       from === 'balance' || from === 'both' ? amount.mul(-1) : Big(0);
 
     this.updateAsset(symbol, available, balance);
+    walletHistory.add('withdraw', { symbol, amount: amount.mul(-1) });
   }
 
   convert(
     from: { symbol: string; amount: Big },
     to: { symbol: string; amount: Big }
   ): void {
-    this.pauseUpdating = true;
-
-    this.subtract(from.symbol, from.amount);
-    this.add(to.symbol, to.amount);
-
-    this.pauseUpdating = false;
-    this.updateStore();
-  }
-
-  private toJSON(): string {
-    try {
-      return JSON.stringify(Object.fromEntries(this.#wallet.entries()));
-    } catch (e) {
-      return '{}';
-    }
-  }
-
-  private loadStore(): Map<string, WalletAsset> | undefined {
-    const json = JSON.parse(localStorage.getItem('wallet'));
-    const entries = Object.entries(json ?? {});
-    const assetEntries = entries.reduce<Array<[string, WalletAsset]>>(
-      (sum, [symbol, asset]) => {
-        if (!isWalletAsset(asset)) return sum;
-        return [
-          ...sum,
-          [
-            symbol,
-            {
-              ...asset,
-              available: Big(asset.available),
-              balance: Big(asset.balance),
-            },
-          ],
-        ];
-      },
-      []
-    );
-
-    return assetEntries.length ? new Map(assetEntries) : undefined;
+    this.batchStoreUpdates(() => {
+      this.withdraw(from.symbol, from.amount);
+      this.deposit(to.symbol, to.amount);
+    });
   }
 
   private updateAsset(symbol: string, available: Big, balance: Big): void {
     const prevAvailable = this.get(symbol)?.available ?? Big(0);
     const prevBalance = this.get(symbol)?.balance ?? Big(0);
 
-    this.#wallet.set(symbol, {
+    this.store.set(symbol, {
       symbol,
-      type: supportedCurrencies.includes(symbol) ? 'currency' : 'coin',
+      type: SupportedCurrencies.includes(symbol) ? 'currency' : 'coin',
       available: available.plus(prevAvailable),
       balance: balance.plus(prevBalance),
     });
@@ -168,12 +136,41 @@ class Wallet extends Store {
     this.updateStore();
   }
 
-  updateStore(): void {
-    super.updateStore();
-    if (browser) {
-      localStorage.setItem('wallet', this.toJSON());
-    }
+  protected onLoadStoreValue(val: WalletAsset): WalletAsset {
+    return {
+      ...val,
+      available: Big(val.available),
+      balance: Big(val.balance),
+    };
+  }
+}
+
+class WalletHistory extends SetStore<WalletHistoryTransaction> {
+  constructor() {
+    super('wallet-history');
+  }
+
+  add(
+    type: 'deposit' | 'withdraw',
+    val: Pick<WalletHistoryTransaction, 'symbol' | 'amount'>
+  ): void {
+    const timestamp = Date.now();
+    this.store.add({
+      ...val,
+      id: `${type}_${val.symbol}_${timestamp}`,
+      type,
+      timestamp,
+    });
+
+    this.updateStore();
+  }
+
+  protected onLoadStoreValue(
+    val: WalletHistoryTransaction
+  ): WalletHistoryTransaction {
+    return { ...val, amount: Big(val.amount) };
   }
 }
 
 export const wallet = new Wallet();
+export const walletHistory = new WalletHistory();

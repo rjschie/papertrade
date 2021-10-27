@@ -1,7 +1,7 @@
 <script lang="ts">
   import DataTable from '$lib/components/DataTable.svelte';
   import { DateTime } from '$lib/constants/date';
-  import { ledger } from '$lib/stores/ledger';
+  import { orders } from '$lib/stores/orders';
   import dayjs from 'dayjs';
 
   let cls = '';
@@ -13,8 +13,8 @@
     { key: 'total', class: 'text-right' },
     '',
   ];
-  let data: typeof ledger.orders;
-  $: data = $ledger.orders.map((d) => ({
+  let data: typeof orders.entries;
+  $: data = $orders.entries.map((d) => ({
     ...d,
     date: dayjs(d.timestamp).format(DateTime),
     amount: `${d.base.amount} ${d.base.symbol}`,

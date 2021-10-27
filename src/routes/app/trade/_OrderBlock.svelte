@@ -3,8 +3,9 @@
   import Input from '$lib/components/Input.svelte';
   import Big from 'big.js';
   import { WalletAsset, wallet } from '$lib/stores/wallet';
-  import { Asset, ledger } from '$lib/stores/ledger';
   import { snackbars } from '$lib/stores/context';
+  import type { Asset } from '$types/asset';
+  import { orders } from '$lib/stores/orders';
 
   export let base: string;
   export let quote: string;
@@ -83,13 +84,13 @@
       amount: total,
     };
 
-    $ledger.add({
+    $orders.add({
       filled: 0,
-      type: 'order',
+      type: 'market',
       base: baseAsset,
       quote: quoteAsset,
+      mode,
     });
-    $wallet.subtract(quote, total, 'available');
 
     snackbars.add('Order added.');
 

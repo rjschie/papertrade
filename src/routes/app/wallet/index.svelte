@@ -3,9 +3,9 @@
   import Input from '$lib/components/Input.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import { currency } from '$lib/helpers/format';
-  import { wallet, WalletAsset } from '$lib/stores/wallet';
+  import { wallet, walletHistory } from '$lib/stores/wallet';
+  import type { WalletAsset } from '$lib/stores/wallet';
   import Big from 'big.js';
-  import { ledger } from '$lib/stores/ledger';
   import DataTable from '$lib/components/DataTable.svelte';
   import dayjs from 'dayjs';
   import { DateTime } from '$lib/constants/date';
@@ -29,6 +29,7 @@
   }
 
   function validate(this: HTMLFormElement): boolean {
+    errors = [];
     if (showWithdrawModal && amount.gte(availableAsset.available)) {
       errors = [...errors, 'Unavailable funds'];
     }
@@ -39,16 +40,11 @@
   function transact(this: HTMLFormElement): void {
     if (!validate.call(this)) return;
 
-    const invert = showWithdrawModal;
-    $wallet.add(symbol, invert ? amount.mul(-1) : amount);
-    $ledger.add({
-      type: invert ? 'withdrawal' : 'deposit',
-      filled: 100,
-      base: {
-        symbol,
-        amount,
-      },
-    });
+    if (showWithdrawModal) {
+      $wallet.withdraw(symbol, amount);
+    } else {
+      $wallet.deposit(symbol, amount);
+    }
 
     snackbars.add(
       `${showWithdrawModal ? 'Withdrew' : 'Deposited'} ${currency.format(
@@ -145,7 +141,7 @@
       <h2 class="text-xl font-bold">Transaction History</h2>
     </div>
 
-    {#if $ledger.depositsAndWithdrawals.length}
+    {#if $walletHistory.entries.length}
       <DataTable
         class="w-full mt-6"
         sorting={false}
@@ -153,18 +149,16 @@
         theadBorder={false}
         rowAlternating={false}
         columns={[
-          { key: 'date', class: '!px-2 !py-3' },
+          { key: 'date', class: '!px-2 !py-3', sortKey: '-timestamp' },
           { key: 'type', class: '!px-2 !py-3' },
           { key: 'amount', class: 'text-right !px-2 !py-3' },
           '',
         ]}
-        data={$ledger.depositsAndWithdrawals
-          .sort((a, b) => b.timestamp - a.timestamp)
-          .map((d) => ({
-            ...d,
-            date: dayjs(d.timestamp).format(DateTime),
-            amount: currency.format(d.base.symbol, d.base.amount),
-          }))}
+        data={$walletHistory.entries.map((d) => ({
+          ...d,
+          date: dayjs(d.timestamp).format(DateTime),
+          amount: currency.format(d.symbol, d.amount),
+        }))}
       >
         <td
           slot="cell"

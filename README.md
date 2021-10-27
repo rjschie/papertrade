@@ -21,7 +21,10 @@
     - [x] validation component
     - [x] validate available balances
   - [x] Snackbars
-- [ ] Order vs Deposit/Withdraw stores
+- [x] Order vs Deposit/Withdraw stores
+- Update Order Info UX
+  - [ ] show more order info
+  - [ ] cancel orders
 - [ ] Load Trade pairs
 - [ ] Reconcile on page load
 - [ ] KLines
