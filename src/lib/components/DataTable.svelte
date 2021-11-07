@@ -90,7 +90,8 @@
                   <span
                     class="inline-block transition duration-100"
                     class:rotate-0={!sort?.includes('-')}
-                    class:rotate-180={sort?.includes('-')}
+                    class:rotate-180={getColumnSortKey(column) ===
+                      sort?.replace('-', '') && sort?.includes('-')}
                     class:opacity-20={getColumnSortKey(column) !==
                       sort?.replace('-', '')}
                   >

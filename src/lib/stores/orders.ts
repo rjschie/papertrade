@@ -6,11 +6,15 @@ import Big from 'big.js';
 export type Order = {
   id: string;
   timestamp: number;
+  pair: string;
   base: Asset;
   quote: Asset;
   mode: 'buy' | 'sell';
   type: 'limit' | 'market' | 'stop-limit';
-  filled: number; // 0 - 100 (percent)
+  triggerPrice: number;
+  filled: number; // num filled of total base amount
+  filledAveragePrice: number;
+  status: 'canceled' | 'pending' | 'executed';
 };
 
 export function isOrder(t: unknown): t is Order {

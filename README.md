@@ -26,10 +26,14 @@
   - [ ] show more order info
   - [ ] cancel orders
 - [ ] Load Trade pairs
-- [ ] Reconcile on page load
 - [ ] KLines
-- [ ] Animations
+- [ ] Reconcile on page load
 - [ ] Reconcile during page loaded
+- Order book improvements
+  - [ ] Show "assets" below order book
+    - with deposit/withdraw buttons
+  - [ ] Slider 0 to 100% of available
+- [ ] Animations
 
 #### TODO persistence
 
